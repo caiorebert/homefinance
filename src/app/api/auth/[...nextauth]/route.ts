@@ -51,6 +51,7 @@ const handler = NextAuth({
         token.name = user.name;
         // @ts-ignore
         token.email = user.email;
+        // @ts-ignore
         token.conta = user.conta;
       }
       return token;
