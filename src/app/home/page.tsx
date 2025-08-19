@@ -5,8 +5,6 @@ import { Menu } from "primereact/menu";
 import { useEffect, useRef, useState } from "react";
 import { getHomeData } from "../api/home";
 import { signOut, useSession } from "next-auth/react";
-import { Dialog } from "primereact/dialog";
-import { createTransacao } from "../api/transacao";
 import ModalTransacao from "./components/modal-transacao";
 
 export default function Home() {
@@ -84,9 +82,9 @@ export default function Home() {
   
   return (
     <div>
-      <div className="min-h-screen bg-black">
+      <div className="min-h-screen bg-white text-black">
         {/* Header */}
-        <div className="bg-black shadow-sm p-4 flex justify-between items-center">
+        <div className="bg-white shadow-sm p-4 flex justify-between items-center">
           <h1 className="text-xl font-bold text-white">Home Finance</h1>
           <Button 
             icon="pi pi-bars" 
@@ -123,7 +121,7 @@ export default function Home() {
         <div className="px-4 pb-4">
           <h3 className="text-lg font-semibold mb-3">Resumo do Mês</h3>
           <div className="space-y-3">
-            <div className="bg-white rounded-lg p-4 shadow-sm border">
+            <div className="bg-white rounded-lg p-4 shadow-sm border border-white">
               <div className="flex justify-between items-center">
                 <div>
                   <p className="text-gray-600 text-sm">Receitas</p>
@@ -133,7 +131,7 @@ export default function Home() {
               </div>
             </div>
             
-            <div className="bg-white rounded-lg p-4 shadow-sm border">
+            <div className="bg-white rounded-lg p-4 shadow-sm border border-white">
               <div className="flex justify-between items-center">
                 <div>
                   <p className="text-gray-600 text-sm">Despesas</p>
@@ -148,10 +146,10 @@ export default function Home() {
         {/* Recent Transactions */}
         <div className="px-4 pb-6">
           <h3 className="text-lg font-semibold mb-3">Transações Recentes</h3>
-          <div className="bg-black rounded-lg shadow-sm border">
+          <div className="bg-white rounded-lg shadow-sm border border-white">
             {home.transacoes.map((item) => (
               /* @ts-ignore */
-              <div key={item.id} className="p-4 border-b last:border-b-0 flex justify-between items-center">
+              <div key={item.id} className="p-4 border-b last:border-b-0 grid grid-cols-2 border-gray justify-between items-center">
                 <div className="flex items-center space-x-3">
                   <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
                     <i className="pi pi-shopping-cart text-blue-600"></i>
@@ -163,11 +161,42 @@ export default function Home() {
                     <p className="text-gray-500 text-sm">{item.data}</p>
                   </div>
                 </div>
-                {/* @ts-ignore */}
-                <p className={`text-lg font-bold ${item.tipo === 'entrada' ? 'text-green-600' : 'text-red-600'}`}>
+                <div>
                   {/* @ts-ignore */}
-                  {item.tipo === 'entrada' ? '+' : '-'} R$ {item.valor}
-                </p>
+                  <p className={`text-right text-lg font-bold ${item.tipo === 'entrada' ? 'text-green-600' : 'text-red-600'}`}>
+                    {/* @ts-ignore */}
+                    {item.tipo === 'entrada' ? '+' : '-'} R$ {item.valor}
+                  </p>
+                  <table style={{ width: '50px', height: '50px', float: 'right' }}>
+                    <tbody>
+                      <tr>
+                        <td>
+                          <Button 
+                            icon="pi pi-pencil" 
+                            className="p-button-text p-button-rounded p-button-secondary"
+                            onClick={() => {
+                              setTransacaoForm({
+                                descricao: item.descricao || "",
+                                valor: item.valor,
+                                tipo: item.tipo,
+                                data: item.data,
+                                user_id: item.user_id,
+                                categoria_id: item.categoria_id
+                              });
+                              setModalVisible(true);
+                            }} 
+                          />
+                        </td>
+                        <td>
+                          <Button 
+                            icon="pi pi-trash" 
+                            className="p-button-text p-button-rounded p-button-danger"
+                          />
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
               </div>
             ))}
           </div>
