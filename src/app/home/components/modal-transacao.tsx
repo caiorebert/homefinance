@@ -1,22 +1,25 @@
-import { createTransacao } from "@/app/api/transacao";
-import { on } from "events";
+import { createTransacao, updateTransacao } from "@/app/api/transacao";
+import { error } from "console";
 import { useSession } from "next-auth/react";
 import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 type ModalTransacaoProps = {
+    id?: number;
     atualizaHome: () => void;
     visible: boolean;
     onClose: () => void;
     user_id?: number;
+    transacao?: any;
 };
 
 
-export default function ModalTransacao({ atualizaHome, visible = false, onClose, user_id }: ModalTransacaoProps) {
+export default function ModalTransacao({ atualizaHome, visible = false, onClose, user_id, transacao }: ModalTransacaoProps) {
     const { data: session, status } = useSession();
     const [loading, setLoading] = useState(false);
     const [transacaoForm, setTransacaoForm] = useState({
+        id: 0,
         descricao: "",
         valor: 0,
         tipo: "entrada",
@@ -36,17 +39,42 @@ export default function ModalTransacao({ atualizaHome, visible = false, onClose,
         }
         // @ts-ignore
         setTransacaoForm({ ...transacaoForm, user_id: session?.user.id });
-        createTransacao(transacaoForm)
-            .then(() => {
-                setLoading(false);
-                onClose();
-                atualizaHome()
-            })
-            .catch((error) => {
-                setLoading(false);
-                console.error("Erro ao criar transação:", error);
-            });
+        if (transacao.id) {
+            updateTransacao(transacaoForm)
+                .then(() => {
+                    setLoading(false);
+                    onClose();
+                    atualizaHome();
+                })
+                .catch((error) => {
+                    setLoading(false);
+                    console.error("Erro ao atualizar transação:", error);
+                });
+        } else {
+            createTransacao(transacaoForm)
+                .then(() => {
+                    setLoading(false);
+                    onClose();
+                    atualizaHome()
+                })
+                .catch((error) => {
+                    setLoading(false);
+                    console.error("Erro ao criar transação:", error);
+                });
+        }
     }
+
+    useEffect(() => {
+        if (transacao.id) {
+            setTransacaoForm({
+                ...transacao,
+                valor: parseFloat(transacao.valor),
+                descricao: transacao.descricao,
+                data: transacao.data.split('T')[0],
+                tipo: transacao.tipo,
+            });
+        }
+    }, [transacao]);
 
     if (status === 'loading') {
         return <div>Loading...</div>;
@@ -67,6 +95,7 @@ export default function ModalTransacao({ atualizaHome, visible = false, onClose,
                     Descrição
                     </label>
                     <input
+                    value={transacaoForm.descricao}
                     /* @ts-ignore */
                     onInput={(e) => setTransacaoForm({ ...transacaoForm, descricao: e.target.value })}
                     type="text" className="p-inputtext p-component w-full" />
@@ -77,6 +106,7 @@ export default function ModalTransacao({ atualizaHome, visible = false, onClose,
                     Data
                     </label>
                     <input
+                    value={transacaoForm.data}
                     /* @ts-ignore */
                     onInput={(e) => setTransacaoForm({ ...transacaoForm, data: e.target.value })}
                     type="date" className="p-inputtext p-component w-full" />
@@ -84,6 +114,7 @@ export default function ModalTransacao({ atualizaHome, visible = false, onClose,
                 <div className="mb-4">
                     <label className="block text-sm font-medium mb-2">Tipo</label>
                     <select 
+                    value={transacaoForm.tipo}
                     className="p-inputtext p-component w-full"
                     onChange={(e) => setTransacaoForm({ ...transacaoForm, tipo: e.target.value })}>
                     <option value="entrada">Entrada</option>
@@ -93,6 +124,7 @@ export default function ModalTransacao({ atualizaHome, visible = false, onClose,
                 <div className="mb-4">
                     <label className="block text-sm font-medium mb-2">Valor</label>
                     <input
+                    value={transacaoForm.valor}
                     type="number"
                     className="p-inputtext p-component w-full"
                     /* @ts-ignore */

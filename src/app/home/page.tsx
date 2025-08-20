@@ -6,12 +6,14 @@ import { useEffect, useRef, useState } from "react";
 import { getHomeData } from "../api/home";
 import { signOut, useSession } from "next-auth/react";
 import ModalTransacao from "./components/modal-transacao";
+import { deleteTransacao } from "../api/transacao";
 
 export default function Home() {
   const { data:session, status } = useSession();
   const menuRight = useRef(null);
   const [modalVisible, setModalVisible] = useState(false);
   const [transacaoForm, setTransacaoForm] = useState({
+    id: 0,
     descricao: "",
     valor: 0,
     tipo: "entrada",
@@ -59,6 +61,31 @@ export default function Home() {
           console.error("Erro ao buscar dados da home:", error);
         }
       );
+  }
+
+  const handleModalEdicao = (transacao:any) => {
+    setTransacaoForm({ 
+      ...transacao,
+      // @ts-ignore
+      user_id: session?.user.id || 0,
+      categoria_id: transacao.categoria_id || 1,
+      descricao: transacao.descricao || "",
+      valor: transacao.valor || 0,
+      data: transacao.data || new Date().toISOString().split('T')[0] 
+    });
+    setModalVisible(true);
+  }
+
+  const handleDelete = (id: number) => {
+    if (confirm("Você tem certeza que deseja excluir esta transação?")) {
+      deleteTransacao(id)
+        .then(() => {
+          atualizaHome();
+        })
+        .catch((error) => {
+          console.error("Erro ao excluir transação:", error);
+        });
+    }
   }
 
   useEffect(() => {
@@ -174,21 +201,13 @@ export default function Home() {
                           <Button 
                             icon="pi pi-pencil" 
                             className="p-button-text p-button-rounded p-button-secondary"
-                            onClick={() => {
-                              setTransacaoForm({
-                                descricao: item.descricao || "",
-                                valor: item.valor,
-                                tipo: item.tipo,
-                                data: item.data,
-                                user_id: item.user_id,
-                                categoria_id: item.categoria_id
-                              });
-                              setModalVisible(true);
-                            }} 
+                            onClick={() => handleModalEdicao(item)} 
                           />
                         </td>
                         <td>
-                          <Button 
+                          <Button
+                            /* @ts-ignore */ 
+                            onClick={() => handleDelete(item.id)}
                             icon="pi pi-trash" 
                             className="p-button-text p-button-rounded p-button-danger"
                           />
@@ -204,6 +223,7 @@ export default function Home() {
       </div>
       <ModalTransacao 
         atualizaHome={atualizaHome}
+        transacao={transacaoForm}
         visible={modalVisible}
         onClose={() => setModalVisible(false)}
         // @ts-ignore
