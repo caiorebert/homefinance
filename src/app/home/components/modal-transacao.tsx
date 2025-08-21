@@ -64,6 +64,18 @@ export default function ModalTransacao({ atualizaHome, visible = false, onClose,
         }
     }
 
+    const limpaForm = () => {
+        setTransacaoForm({
+            id: 0,
+            descricao: "",
+            valor: 0,
+            tipo: "entrada",
+            data: new Date().toISOString().split('T')[0],
+            user_id: user_id,
+            categoria_id: 1
+        });
+    };
+
     useEffect(() => {
         if (transacao.id) {
             setTransacaoForm({
@@ -84,7 +96,7 @@ export default function ModalTransacao({ atualizaHome, visible = false, onClose,
         <Dialog
             visible={visible}
             modal
-            onHide={() => onClose() }
+            onHide={() => { onClose(); limpaForm() } }
             content={({ hide }) => (
             <div className="grid grid-rows px-10 py-10 gap-4 w-full" style={{ borderRadius: '12px', backgroundImage: 'radial-gradient(circle at left top, var(--primary-400), var(--primary-700))' }}>
                 <h2 className="text-lg font-semibold mb-4">Adicionar Movimentação</h2>

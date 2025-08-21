@@ -40,6 +40,7 @@ export default function Home() {
     ];
 
   const [home, setHome] = useState({
+    primeiroNome: null,
     saldoTotal: 0,
     receitas: 0,
     despesas: 0,
@@ -54,7 +55,8 @@ export default function Home() {
             saldoTotal: data.saldoTotal,
             receitas: data.receitas,
             despesas: data.despesas,
-            transacoes: data.transacoes
+            transacoes: data.transacoes,
+            primeiroNome: data.primeiroNome || "Usuário"
           });
         })
         .catch((error) => {
@@ -112,7 +114,7 @@ export default function Home() {
       <div className="min-h-screen bg-white text-black">
         {/* Header */}
         <div className="bg-white shadow-sm p-4 flex justify-between items-center">
-          <h1 className="text-xl font-bold text-white">Home Finance</h1>
+          <h1 className="text-xl font-bold text-black">Home Finance</h1>
           <Button 
             icon="pi pi-bars" 
             className="p-button-text p-button-rounded"
@@ -124,10 +126,10 @@ export default function Home() {
 
         {/* Balance Card */}
         <div className="p-4">
+          <h1 className="text-2xl mb-3">Olá { home.primeiroNome }</h1>
           <div className="bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg p-6 text-white">
             <p className="text-sm opacity-90">Saldo Total</p>
             <h2 className="text-3xl font-bold">{ home.saldoTotal }</h2>
-            <p className="text-sm opacity-90 mt-1">+5,2% este mês</p>
           </div>
         </div>
 

@@ -57,7 +57,6 @@ const handler = NextAuth({
       return token;
     },
     async session({ session, token }) {
-      console.log("Session callback:", session, token);
       // @ts-ignore
       session.accessToken = token.accessToken;
       // @ts-ignore
