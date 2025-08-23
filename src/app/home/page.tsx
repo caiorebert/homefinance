@@ -7,11 +7,13 @@ import { getHomeData } from "../api/home";
 import { signOut, useSession } from "next-auth/react";
 import ModalTransacao from "./components/modal-transacao";
 import { deleteTransacao } from "../api/transacao";
+import { Skeleton } from "primereact/skeleton";
 
 export default function Home() {
   const { data:session, status } = useSession();
   const menuRight = useRef(null);
   const [modalVisible, setModalVisible] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [transacaoForm, setTransacaoForm] = useState({
     id: 0,
     descricao: "",
@@ -48,6 +50,7 @@ export default function Home() {
   });
 
   const atualizaHome = () => {
+    setLoading(true);
     /* @ts-ignore */
     getHomeData(session?.user.id)
         .then((data) => {
@@ -58,6 +61,7 @@ export default function Home() {
             transacoes: data.transacoes,
             primeiroNome: data.primeiroNome || "Usuário"
           });
+          setLoading(false);
         })
         .catch((error) => {
           console.error("Erro ao buscar dados da home:", error);
@@ -107,7 +111,7 @@ export default function Home() {
         </div>
       </div>
     )
-  } 
+  }
   
   return (
     <div>
@@ -126,48 +130,67 @@ export default function Home() {
 
         {/* Balance Card */}
         <div className="p-4">
-          <h1 className="text-2xl mb-3">Olá { home.primeiroNome }</h1>
-          <div className="bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg p-6 text-white">
-            <p className="text-sm opacity-90">Saldo Total</p>
-            <h2 className="text-3xl font-bold">{ home.saldoTotal }</h2>
-          </div>
+          {
+            loading ? 
+            <Skeleton className="mb-3" width="200px" height="30px" shape="rectangle"/> :
+            <h1 className="text-2xl mb-3">Olá { home.primeiroNome }</h1>
+          }
+          {
+            loading ? 
+            <Skeleton className="mb-3" width="100%" height="60px" shape="rectangle"/> :
+            <div className="bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg p-6 text-white">
+              <p className="text-sm opacity-90">Saldo Total</p>
+              <h2 className="text-3xl font-bold">{ home.saldoTotal }</h2>
+            </div>
+          }
         </div>
 
-        {/* Quick Actions */}
-        <div className="px-4 pb-4">
-          <h3 className="text-lg font-semibold mb-3">Ações Rápidas</h3>
-          <div className="grid grid-cols-1">
-            <Button 
-              label="Adicionar Movimentação"
-              onClick={() => setModalVisible(true)} 
-              icon="pi pi-plus" 
-              className="p-button-secondary p-3"
-            />
+         {
+          loading ?
+          <Skeleton className="mb-3" width="100%" height="50px" shape="rectangle"/> :
+          <div className="mb-1 px-4 pb-4">
+            <h3 className="text-lg font-semibold mb-3">Ações Rápidas</h3>
+            <div className="grid grid-cols-1">
+              <Button 
+                label="Adicionar Movimentação"
+                onClick={() => setModalVisible(true)} 
+                icon="pi pi-plus" 
+                className="p-button-secondary p-3"
+              />
+            </div>
           </div>
-        </div>
+         } 
 
         {/* Summary Cards */}
         <div className="px-4 pb-4">
           <h3 className="text-lg font-semibold mb-3">Resumo do Mês</h3>
           <div className="space-y-3">
             <div className="bg-white rounded-lg p-4 shadow-sm border border-white">
-              <div className="flex justify-between items-center">
-                <div>
-                  <p className="text-gray-600 text-sm">Receitas</p>
-                  <p className="text-green-600 text-xl font-bold">{home.receitas}</p>
+              {
+                loading ? 
+                <Skeleton className="mb-3" width="100%" height="30px" shape="rectangle"/> :
+                <div className="flex justify-between items-center">
+                  <div>
+                    <p className="text-gray-600 text-sm">Receitas</p>
+                    <p className="text-green-600 text-xl font-bold">{home.receitas}</p>
+                  </div>
+                  <i className="pi pi-arrow-up text-green-500 text-xl"></i>
                 </div>
-                <i className="pi pi-arrow-up text-green-500 text-xl"></i>
-              </div>
+              }
             </div>
             
             <div className="bg-white rounded-lg p-4 shadow-sm border border-white">
-              <div className="flex justify-between items-center">
-                <div>
-                  <p className="text-gray-600 text-sm">Despesas</p>
-                  <p className="text-red-600 text-xl font-bold">{home.despesas}</p>
+              {
+                loading ?
+                <Skeleton className="mb-3" width="100%" height="30px" shape="rectangle"/> :
+                <div className="flex justify-between items-center">
+                  <div>
+                    <p className="text-gray-600 text-sm">Despesas</p>
+                    <p className="text-red-600 text-xl font-bold">{home.despesas}</p>
+                  </div>
+                  <i className="pi pi-arrow-down text-red-500 text-xl"></i>
                 </div>
-                <i className="pi pi-arrow-down text-red-500 text-xl"></i>
-              </div>
+              }
             </div>
           </div>
         </div>
@@ -175,52 +198,56 @@ export default function Home() {
         {/* Recent Transactions */}
         <div className="px-4 pb-6">
           <h3 className="text-lg font-semibold mb-3">Transações Recentes</h3>
-          <div className="bg-white rounded-lg shadow-sm border border-white">
-            {home.transacoes.map((item) => (
-              /* @ts-ignore */
-              <div key={item.id} className="p-4 border-b last:border-b-0 grid grid-cols-2 border-gray justify-between items-center">
-                <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                    <i className="pi pi-shopping-cart text-blue-600"></i>
+          {
+            loading ?
+            <Skeleton className="mb-3" width="100%" height="50px" shape="rectangle"/> :  
+            <div className="bg-white rounded-lg shadow-sm border border-white">
+              {home.transacoes.map((item) => (
+                /* @ts-ignore */
+                <div key={item.id} className="p-4 border-b last:border-b-0 grid grid-cols-2 border-gray justify-between items-center">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                      <i className="pi pi-shopping-cart text-blue-600"></i>
+                    </div>
+                    <div>
+                      {/* @ts-ignore */}
+                      <p className="font-medium">{item.descricao || 'Sem descrição'}</p>
+                      {/* @ts-ignore */}
+                      <p className="text-gray-500 text-sm">{item.data}</p>
+                    </div>
                   </div>
                   <div>
                     {/* @ts-ignore */}
-                    <p className="font-medium">{item.descricao || 'Sem descrição'}</p>
-                    {/* @ts-ignore */}
-                    <p className="text-gray-500 text-sm">{item.data}</p>
+                    <p className={`text-right text-lg font-bold ${item.tipo === 'entrada' ? 'text-green-600' : 'text-red-600'}`}>
+                      {/* @ts-ignore */}
+                      {item.tipo === 'entrada' ? '+' : '-'} R$ {item.valor}
+                    </p>
+                    <table style={{ width: '50px', height: '50px', float: 'right' }}>
+                      <tbody>
+                        <tr>
+                          <td>
+                            <Button 
+                              icon="pi pi-pencil" 
+                              className="p-button-text p-button-rounded p-button-secondary"
+                              onClick={() => handleModalEdicao(item)} 
+                            />
+                          </td>
+                          <td>
+                            <Button
+                              /* @ts-ignore */ 
+                              onClick={() => handleDelete(item.id)}
+                              icon="pi pi-trash" 
+                              className="p-button-text p-button-rounded p-button-danger"
+                            />
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
                   </div>
                 </div>
-                <div>
-                  {/* @ts-ignore */}
-                  <p className={`text-right text-lg font-bold ${item.tipo === 'entrada' ? 'text-green-600' : 'text-red-600'}`}>
-                    {/* @ts-ignore */}
-                    {item.tipo === 'entrada' ? '+' : '-'} R$ {item.valor}
-                  </p>
-                  <table style={{ width: '50px', height: '50px', float: 'right' }}>
-                    <tbody>
-                      <tr>
-                        <td>
-                          <Button 
-                            icon="pi pi-pencil" 
-                            className="p-button-text p-button-rounded p-button-secondary"
-                            onClick={() => handleModalEdicao(item)} 
-                          />
-                        </td>
-                        <td>
-                          <Button
-                            /* @ts-ignore */ 
-                            onClick={() => handleDelete(item.id)}
-                            icon="pi pi-trash" 
-                            className="p-button-text p-button-rounded p-button-danger"
-                          />
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          }
         </div>
       </div>
       <ModalTransacao 
