@@ -1,17 +1,20 @@
 "use client";
 
 import { Button } from "primereact/button";
-import { Menu } from "primereact/menu";
 import { useEffect, useRef, useState } from "react";
 import { getHomeData } from "../api/home";
 import { signOut, useSession } from "next-auth/react";
 import ModalTransacao from "./components/modal-transacao";
 import { deleteTransacao } from "../api/transacao";
 import { Skeleton } from "primereact/skeleton";
+import { MenuSidebar, MenuSidebarRef } from "../components/menu-sidebar";
+
 
 export default function Home() {
   const { data:session, status } = useSession();
-  const menuRight = useRef(null);
+  const menuSidebarRef = useRef<MenuSidebarRef>(null);
+  const [dadosEscondidos, setDadosEscondidos] = useState(false);
+  const [menuVisible, setMenuVisible] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [loading, setLoading] = useState(false);
   const [transacaoForm, setTransacaoForm] = useState({
@@ -25,12 +28,8 @@ export default function Home() {
   });
     const items = [
         {
-          label: "Login",
-          icon: "pi pi-user",
-        },
-        {
-          label: "Registre-se",
-          icon: "pi pi-user-plus",
+          label: "Serviços",
+          icon: "pi pi-th-large",
         },
         {
           label: "Sair",
@@ -123,10 +122,11 @@ export default function Home() {
             icon="pi pi-bars" 
             className="p-button-text p-button-rounded"
             /* @ts-ignore */
-            onClick={(event) => menuRight.current?.toggle(event)}
-          />
-          <Menu model={items} popup ref={menuRight} />
+            onClick={() => menuSidebarRef.current?.setMenuVisible(true)}
+          />  
         </div>
+
+        <MenuSidebar visible={menuVisible} ref={menuSidebarRef} />
 
         {/* Balance Card */}
         <div className="p-4">
@@ -138,9 +138,19 @@ export default function Home() {
           {
             loading ? 
             <Skeleton className="mb-3" width="100%" height="60px" shape="rectangle"/> :
-            <div className="bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg p-6 text-white">
-              <p className="text-sm opacity-90">Saldo Total</p>
-              <h2 className="text-3xl font-bold">{ home.saldoTotal }</h2>
+            <div className="grid grid-cols-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg p-6 text-white">
+              <div className="col-span-7">
+                <p className="text-sm opacity-90">Saldo Total</p>
+                <h2 className="text-3xl font-bold">{ (dadosEscondidos) ? "······" : home.saldoTotal }</h2>
+              </div>
+              <div className="flex items-center justify-center">
+                <Button 
+                  onClick={() => setDadosEscondidos(!dadosEscondidos)} 
+                  className="mt-3"
+                >
+                  {dadosEscondidos ? <i className="pi pi-eye"></i> : <i className="pi pi-eye-slash"></i>}
+                </Button>
+              </div>
             </div>
           }
         </div>
@@ -172,7 +182,7 @@ export default function Home() {
                 <div className="flex justify-between items-center">
                   <div>
                     <p className="text-gray-600 text-sm">Receitas</p>
-                    <p className="text-green-600 text-xl font-bold">{home.receitas}</p>
+                    <p className="text-green-600 text-xl font-bold">{(dadosEscondidos) ? "······" : home.receitas}</p>
                   </div>
                   <i className="pi pi-arrow-up text-green-500 text-xl"></i>
                 </div>
@@ -186,7 +196,9 @@ export default function Home() {
                 <div className="flex justify-between items-center">
                   <div>
                     <p className="text-gray-600 text-sm">Despesas</p>
-                    <p className="text-red-600 text-xl font-bold">{home.despesas}</p>
+                    <p className={`text-red-600 text-xl font-bold`}>
+                      {(dadosEscondidos) ? "······" : home.despesas}
+                    </p>
                   </div>
                   <i className="pi pi-arrow-down text-red-500 text-xl"></i>
                 </div>
@@ -217,11 +229,17 @@ export default function Home() {
                     </div>
                   </div>
                   <div>
-                    {/* @ts-ignore */}
-                    <p className={`text-right text-lg font-bold ${item.tipo === 'entrada' ? 'text-green-600' : 'text-red-600'}`}>
-                      {/* @ts-ignore */}
-                      {item.tipo === 'entrada' ? '+' : '-'} R$ {item.valor}
-                    </p>
+                    {
+                      (dadosEscondidos) ?
+                      <p className="text-right text-lg font-bold">······</p> :
+                      <div>
+                        {/* @ts-ignore */}
+                        <p className={`text-right text-lg font-bold ${item.tipo === 'entrada' ? 'text-green-600' : 'text-red-600'}`}>
+                          {/* @ts-ignore */}
+                          {item.tipo === 'entrada' ? '+' : '-'} R$ {item.valor}
+                        </p>
+                      </div>
+                    }
                     <table style={{ width: '50px', height: '50px', float: 'right' }}>
                       <tbody>
                         <tr>
