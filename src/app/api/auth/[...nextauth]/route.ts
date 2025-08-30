@@ -65,6 +65,8 @@ const handler = NextAuth({
       session.user.name = token.name;
       // @ts-ignore
       session.user.email = token.email;
+      // @ts-ignore
+      session.conta = token.conta;
       
       return session;
     },

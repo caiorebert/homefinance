@@ -8,6 +8,7 @@ import ModalTransacao from "./components/modal-transacao";
 import { deleteTransacao } from "../api/transacao";
 import { Skeleton } from "primereact/skeleton";
 import { MenuSidebar, MenuSidebarRef } from "../components/menu-sidebar";
+import { ProgressSpinner } from "primereact/progressspinner";
 
 
 export default function Home() {
@@ -26,19 +27,6 @@ export default function Home() {
     user_id: 0,
     categoria_id: 1
   });
-    const items = [
-        {
-          label: "Serviços",
-          icon: "pi pi-th-large",
-        },
-        {
-          label: "Sair",
-          icon: "pi pi-sign-out",
-          command: () => {
-            signOut({ callbackUrl: '/' });
-          }
-        }
-    ];
 
   const [home, setHome] = useState({
     primeiroNome: null,
@@ -105,7 +93,7 @@ export default function Home() {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
+          <ProgressSpinner style={{width: '50px', height: '50px'}} />
           <p className="text-white">Carregando...</p>
         </div>
       </div>
@@ -138,12 +126,12 @@ export default function Home() {
           {
             loading ? 
             <Skeleton className="mb-3" width="100%" height="60px" shape="rectangle"/> :
-            <div className="grid grid-cols-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg p-6 text-white">
-              <div className="col-span-7">
+            <div className="grid grid-cols-6 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg p-6 text-white">
+              <div className="col-span-4">
                 <p className="text-sm opacity-90">Saldo Total</p>
                 <h2 className="text-3xl font-bold">{ (dadosEscondidos) ? "······" : home.saldoTotal }</h2>
               </div>
-              <div className="flex items-center justify-center">
+              <div className="flex text-right">
                 <Button 
                   onClick={() => setDadosEscondidos(!dadosEscondidos)} 
                   className="mt-3"

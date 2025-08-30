@@ -1,8 +1,11 @@
+
+import { getCategorias } from "@/app/api/categoria";
 import { createTransacao, updateTransacao } from "@/app/api/transacao";
-import { error } from "console";
 import { useSession } from "next-auth/react";
 import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
+import { InputSwitch } from "primereact/inputswitch";
+import { Message } from "primereact/message";
 import { useEffect, useState } from "react";
 
 type ModalTransacaoProps = {
@@ -25,8 +28,10 @@ export default function ModalTransacao({ atualizaHome, visible = false, onClose,
         tipo: "entrada",
         data: new Date().toISOString().split('T')[0],
         user_id: user_id,
-        categoria_id: 1
+        categoria_id: 1,
+        fixo: false
     });
+    const [categorias, setCategorias] = useState([]);
 
     const handleFormTransacao = (e: any) => {
         setLoading(true);
@@ -42,6 +47,7 @@ export default function ModalTransacao({ atualizaHome, visible = false, onClose,
         if (transacao.id) {
             updateTransacao(transacaoForm)
                 .then(() => {
+                    limpaForm();
                     setLoading(false);
                     onClose();
                     atualizaHome();
@@ -53,6 +59,7 @@ export default function ModalTransacao({ atualizaHome, visible = false, onClose,
         } else {
             createTransacao(transacaoForm)
                 .then(() => {
+                    limpaForm();
                     setLoading(false);
                     onClose();
                     atualizaHome()
@@ -64,6 +71,19 @@ export default function ModalTransacao({ atualizaHome, visible = false, onClose,
         }
     }
 
+    const carregaCategorias = async () => {
+        setLoading(true);
+        getCategorias()
+            .then((response) => {
+                //@ts-ignore
+                setCategorias(response);
+                setLoading(false);
+            })
+            .catch((error) => {
+                console.error("Erro ao carregar categorias:", error);
+            })
+    }
+
     const limpaForm = () => {
         setTransacaoForm({
             id: 0,
@@ -72,11 +92,13 @@ export default function ModalTransacao({ atualizaHome, visible = false, onClose,
             tipo: "entrada",
             data: new Date().toISOString().split('T')[0],
             user_id: user_id,
-            categoria_id: 1
+            categoria_id: 1,
+            fixo: false
         });
     };
 
     useEffect(() => {
+        carregaCategorias();
         if (transacao.id) {
             setTransacaoForm({
                 ...transacao,
@@ -86,6 +108,7 @@ export default function ModalTransacao({ atualizaHome, visible = false, onClose,
                 tipo: transacao.tipo,
             });
         }
+        console.log(categorias);
     }, [transacao]);
 
     if (status === 'loading') {
@@ -95,52 +118,78 @@ export default function ModalTransacao({ atualizaHome, visible = false, onClose,
     return (
         <Dialog
             visible={visible}
+            style={{ width: '400px', overflowY: 'scroll'}}
             modal
             onHide={() => { onClose(); limpaForm() } }
             content={({ hide }) => (
-            <div className="grid grid-rows px-10 py-10 gap-4 w-full" style={{ borderRadius: '12px', backgroundImage: 'radial-gradient(circle at left top, var(--primary-400), var(--primary-700))' }}>
+            <div className="grid grid-rows p-5 gap-4 w-full" style={{ borderRadius: '12px', backgroundImage: 'radial-gradient(circle at left top, var(--primary-400), var(--primary-700))' }}>
                 <h2 className="text-lg font-semibold mb-4">Adicionar Movimentação</h2>
                 <form>
                 <div className="mb-4">
                     <label
-                    className="block text-sm font-medium mb-2">
-                    Descrição
+                        className="block text-sm font-medium mb-2">
+                        Descrição
                     </label>
                     <input
-                    value={transacaoForm.descricao}
-                    /* @ts-ignore */
-                    onInput={(e) => setTransacaoForm({ ...transacaoForm, descricao: e.target.value })}
-                    type="text" className="p-inputtext p-component w-full" />
+                        value={transacaoForm.descricao}
+                        /* @ts-ignore */
+                        onInput={(e) => setTransacaoForm({ ...transacaoForm, descricao: e.target.value })}
+                        type="text" className="p-inputtext p-component w-full" />
                 </div>
                 <div className="mb-4">
                     <label
-                    className="block text-sm font-medium mb-2">
-                    Data
+                        className="block text-sm font-medium mb-2">
+                        Data
                     </label>
                     <input
-                    value={transacaoForm.data}
-                    /* @ts-ignore */
-                    onInput={(e) => setTransacaoForm({ ...transacaoForm, data: e.target.value })}
-                    type="date" className="p-inputtext p-component w-full" />
+                        value={transacaoForm.data}
+                        /* @ts-ignore */
+                        onInput={(e) => setTransacaoForm({ ...transacaoForm, data: e.target.value })}
+                        type="date" className="p-inputtext p-component w-full" />
+                </div>
+                <div className="mb-4">
+                    <label className="block text-sm font-medium mb-2">Fixo</label>
+                    <InputSwitch 
+                        checked={transacaoForm.fixo} 
+                        onChange={(e) => setTransacaoForm({ ...transacaoForm, fixo: e.target.value })} />
+                        <br></br>
+                    {
+                        transacaoForm.fixo && (
+                            <Message severity="info" text={"Essa transação irá se repetir todos os meses se essa opção estiver marcada. Você pode alterar depois."} />
+                        )
+                    }
                 </div>
                 <div className="mb-4">
                     <label className="block text-sm font-medium mb-2">Tipo</label>
                     <select 
-                    value={transacaoForm.tipo}
-                    className="p-inputtext p-component w-full"
-                    onChange={(e) => setTransacaoForm({ ...transacaoForm, tipo: e.target.value })}>
-                    <option value="entrada">Entrada</option>
-                    <option value="saída">Saída</option>
+                        value={transacaoForm.tipo}
+                        className="p-inputtext p-component w-full"
+                        onChange={(e) => setTransacaoForm({ ...transacaoForm, tipo: e.target.value })}>
+                        <option value="entrada">Entrada</option>
+                        <option value="saída">Saída</option>
+                    </select>
+                </div>
+                <div className="mb-4">
+                    <label className="block text-sm font-medium mb-2">Categoria</label>
+                    <select
+                        value={transacaoForm.categoria_id}
+                        className="p-inputtext p-component w-full"
+                        onChange={(e) => setTransacaoForm({ ...transacaoForm, categoria_id: parseInt(e.target.value) })}>
+                        {
+                            categorias.map((categoria: any) => (
+                                <option key={categoria.id} value={categoria.id}>{categoria.nome}</option>
+                            ))
+                        }
                     </select>
                 </div>
                 <div className="mb-4">
                     <label className="block text-sm font-medium mb-2">Valor</label>
                     <input
-                    value={transacaoForm.valor}
-                    type="number"
-                    className="p-inputtext p-component w-full"
-                    /* @ts-ignore */
-                    onInput={(e) => setTransacaoForm({ ...transacaoForm, valor: parseFloat(e.target.value) })}
+                        value={transacaoForm.valor}
+                        type="number"
+                        className="p-inputtext p-component w-full"
+                        /* @ts-ignore */
+                        onInput={(e) => setTransacaoForm({ ...transacaoForm, valor: parseFloat(e.target.value) })}
                     />
                 </div>
                 <div className="flex justify-end">

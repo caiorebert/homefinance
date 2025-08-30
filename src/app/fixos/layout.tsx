@@ -1,7 +1,8 @@
+"use client"
+
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css";
-import { PrimeReactProvider } from 'primereact/api';
+import "../globals.css";
 import { SessionProvider } from "next-auth/react";
 
 const geistSans = Geist({
@@ -14,27 +15,23 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-export const metadata: Metadata = {
-  title: "HomeFinance Login",
-  icons:{
-    icon: '/logo.png'
-  }
-};
-
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
-    <PrimeReactProvider>
-      <html lang="en">
-        <body
-          className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-        >
+    <html lang="en">
+      <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      </head>
+      <body
+        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+      >
+        <SessionProvider>
           {children}
-        </body>
-      </html>
-    </PrimeReactProvider>
+        </SessionProvider>
+      </body>
+    </html>
   );
 }

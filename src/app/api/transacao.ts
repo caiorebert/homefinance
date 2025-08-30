@@ -1,5 +1,11 @@
 import api from "./api";
 
+export const getTransacoesFixas = async (conta_id: number) => {
+    const response = await api.post(`/transacao/fixas`, { conta_id });
+    console.log(response);
+    return response.data;
+}
+
 export const createTransacao = async (transacao: any) => {
     const response = await api.post("/transacao", transacao);
     return response.data;

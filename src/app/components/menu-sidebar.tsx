@@ -1,4 +1,4 @@
-import { useSession } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 import { Avatar } from "primereact/avatar";
 import { Badge } from "primereact/badge";
 import { Button } from "primereact/button";
@@ -58,11 +58,38 @@ export const MenuSidebar = forwardRef<MenuSidebarRef, Props>(({ visible = false 
                 {/* FAVORITES */}
                 <h4 className="text-gray-400 text-xs font-bold mb-2">SERVIÇOS</h4>
                     <ul className="space-y-3 mb-6">
-                        <li className="flex items-center gap-3 hover:text-black cursor-pointer">
-                            <i className="pi pi-home"></i> Home
+                        <li
+                            className="flex items-center gap-3 hover:text-black cursor-pointer"
+                            onClick={() => { window.location.href = '/home'; }}>
+                            {
+                                window.location.pathname === '/home' ? 
+                                <i className="pi pi-home" style={{color: 'var(--primary-color)'}}></i> 
+                                : 
+                                <i className="pi pi-home"></i>
+                            } 
+                            {
+                                window.location.pathname === '/home' ?
+                                <span className="font-bold" style={{color: 'var(--primary-color)'}}>Início</span>
+                                :
+                                <span>Início</span>
+                            }
                         </li>
-                        <li className="flex items-center gap-3 hover:text-black cursor-pointer">
-                            <i className="pi pi-credit-card"></i> Cartão
+                        <li
+                            className="flex items-center gap-3 hover:text-black cursor-pointer"
+                            onClick={() => { window.location.href = '/cartao'; }} 
+                            >
+                            {
+                                window.location.pathname === '/cartao' ? 
+                                <i className="pi pi-credit-card" style={{color: 'var(--primary-color)'}}></i> 
+                                : 
+                                <i className="pi pi-credit-card"></i>
+                            } 
+                            {
+                                window.location.pathname === '/cartao' ?
+                                <span className="font-bold" style={{color: 'var(--primary-color)'}}>Cartões</span>
+                                :
+                                <span>Cartões</span>
+                            }
                         </li>
                         <li className="flex items-center gap-3 hover:text-black cursor-pointer">
                             <i className="pi pi-chart-line"></i> Investimentos
@@ -96,11 +123,8 @@ export const MenuSidebar = forwardRef<MenuSidebarRef, Props>(({ visible = false 
                                 style={{ float: 'right' }}
                                 className="p-button-rounded p-button-text text-gray-400 hover:text-black ml-auto"
                                 onClick={() => {
-                                    // @ts-ignore
                                     signOut();
                                 }}
-                                tooltip="Sign Out"
-                                tooltipOptions={{ position: 'top' }}
                             />
                         </div>
                     </div>
