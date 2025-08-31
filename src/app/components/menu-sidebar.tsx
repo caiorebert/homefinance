@@ -94,6 +94,16 @@ export const MenuSidebar = forwardRef<MenuSidebarRef, Props>(({ visible = false 
                         <li className="flex items-center gap-3 hover:text-black cursor-pointer">
                             <i className="pi pi-chart-line"></i> Investimentos
                         </li>
+                        <li
+                            className="flex items-center gap-3 hover:text-black cursor-pointer"
+                            onClick={() => { window.location.href = '/balanco'; }}>
+                            <i className="pi pi-chart-bar"></i> Balanço
+                        </li>
+                        <li 
+                            className="flex items-center gap-3 hover:text-black cursor-pointer"
+                            onClick={() => { window.location.href = '/fixos'; }}>
+                            <i className="pi pi-list"></i> Transacoes Fixas
+                        </li>
                         <li className="flex items-center gap-3 hover:text-black cursor-pointer">
                             <i className="pi pi-cog"></i> Configurações
                         </li>

@@ -2,6 +2,7 @@
 import { getCategorias } from "@/app/api/categoria";
 import { createTransacao, updateTransacao } from "@/app/api/transacao";
 import { useSession } from "next-auth/react";
+import Link from "next/link";
 import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
 import { InputSwitch } from "primereact/inputswitch";
@@ -97,6 +98,14 @@ export default function ModalTransacao({ atualizaHome, visible = false, onClose,
         });
     };
 
+    const alertElement = () => {
+        return <div>
+            <span className="font-medium" style={{textAlign: 'justify'}}>Atenção!</span><br></br>
+            Essa transação irá se repetir todos os meses se essa opção estiver marcada.
+            Você pode alterá-la depois na aba de <Link href="/fixos"><b>transações fixas</b></Link>.
+        </div>
+    }
+    
     useEffect(() => {
         carregaCategorias();
         if (transacao.id) {
@@ -155,7 +164,7 @@ export default function ModalTransacao({ atualizaHome, visible = false, onClose,
                         <br></br>
                     {
                         transacaoForm.fixo && (
-                            <Message severity="info" text={"Essa transação irá se repetir todos os meses se essa opção estiver marcada. Você pode alterar depois."} />
+                            <Message severity="info" text={alertElement} />
                         )
                     }
                 </div>
